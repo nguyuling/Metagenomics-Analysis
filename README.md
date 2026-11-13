@@ -15,19 +15,19 @@
     - `pandas`
     - `openpyxl`
 ```bash
-cd <ENV_PATH>
-    conda create -n <ENV_NAME> -c bioconda -c conda-forge fastqc multiqc cutadapt sortmerna
-    conda create -n <ENV_NAME> -c conda-forge -c bioconda -c biobakery -c defaults python=3.10 metaphlan krona humann=3.9 pandas openpyxl
+    cd <ENV_PATH>
+        conda create -n <ENV_NAME> -c bioconda -c conda-forge fastqc multiqc cutadapt sortmerna
+        conda create -n <ENV_NAME> -c conda-forge -c bioconda -c biobakery -c defaults python=3.10 metaphlan krona humann=3.9 pandas openpyxl
 ```
 
 ### Database
-1. **sortmeRNA database **[download-here](https://github.com/sortmerna/sortmerna/tree/master/test_data/refs) — reference rRNA FASTA files curated from SILVA (archaeal, bacterial and eukaryotic) and Rfam (5s and 5.8S rRNA subunits)
+1. **sortmeRNA database**   [[download-here]](https://github.com/sortmerna/sortmerna/tree/master/test_data/refs) — reference rRNA FASTA files curated from SILVA (archaeal, bacterial and eukaryotic) and Rfam (5s and 5.8S rRNA subunits)
 2. **MetapPhlAn database** — MetaPhlAn 4 ChocoPhlAn SGB (Species-level Genome Bins) marker database vJun23
 ```bash
     conda activate <BIOBAKERY_ENV>
     metaphlan --install --index mpa_vJun23_CHOCOPhlAnSGB_202307
 ```
-3. **HUMAnN** [The Huttenhower Lab](https://huttenhower.sph.harvard.edu/humann/) — 
+3. **HUMAnN**   [[The Huttenhower Lab]](https://huttenhower.sph.harvard.edu/humann/) — 
 ```bash — includes chocophlan (nucleotide pangenome database), UniRef90 (database of clustered protein sequences), utility mapping (map UniRef id to other classification systems)
     conda activate <BIOBAKERY_ENV>
     PATH=<ENV_PATH>/lib/python3.10/site-packages/humann/data
@@ -51,13 +51,13 @@ cd <ENV_PATH>
         - editing the values of each column (flag) and row (reads pair)
 3. Resume QC in terminal [y/n], to perform `cutadapt` and `sortmerna`, pair by pair
 ```bash
-y
+    y
 ```
 4. Run bioBakery taxonomic and functional profiling, pair by pair
 ```bash
     conda activate <BIOBAKERY_ENV>
-    bash qc.sh all          # run all unfinished steps, OR
-    bash qc.sh allforce     # run all steps regardlessly
+    bash biobakery.sh all          # run all unfinished steps, OR
+    bash biobakery.sh allforce     # run all steps regardlessly
 ```
 
 ### Output Files Structure
