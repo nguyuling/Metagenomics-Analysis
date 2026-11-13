@@ -11,7 +11,7 @@
 ```
 
 ### Database
-1. **sortmeRNA database**   [[download-here]](https://github.com/sortmerna/sortmerna/tree/master/test_data/refs)
+1. **SortMeRNA database**   [[download-here]](https://github.com/sortmerna/sortmerna/tree/master/test_data/refs)
     contains reference rRNA FASTA files curated from SILVA (archaeal, bacterial and eukaryotic) and Rfam (5s and 5.8S rRNA subunits)
 2. **MetapPhlAn database**
     contains ChocoPhlAn SGB (Species-level Genome Bins) marker database
