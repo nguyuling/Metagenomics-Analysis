@@ -12,15 +12,15 @@
 
 ### Database
 1. **sortmeRNA database**   [[download-here]](https://github.com/sortmerna/sortmerna/tree/master/test_data/refs)
-    Reference rRNA FASTA files curated from SILVA (archaeal, bacterial and eukaryotic) and Rfam (5s and 5.8S rRNA subunits)
+    contains reference rRNA FASTA files curated from SILVA (archaeal, bacterial and eukaryotic) and Rfam (5s and 5.8S rRNA subunits)
 2. **MetapPhlAn database**
-    MetaPhlAn 4 ChocoPhlAn SGB (Species-level Genome Bins) marker database vJun23
+    contains ChocoPhlAn SGB (Species-level Genome Bins) marker database
 ```bash
     conda activate <BIOBAKERY_ENV>
     metaphlan --install --index mpa_vJun23_CHOCOPhlAnSGB_202307
 ```
-3. **HUMAnN**   [[The Huttenhower Lab]](https://huttenhower.sph.harvard.edu/humann/)
-    Including chocophlan (nucleotide pangenome database), UniRef90 (database of clustered protein sequences), utility mapping (map UniRef id to other classification systems)
+3. **HUMAnN database**   [[The Huttenhower Lab]](https://huttenhower.sph.harvard.edu/humann/)
+    includes ChocoPhlAn (nucleotide pangenome database), UniRef90 (database of clustered protein sequences), utility mapping (mapping of UniRef90 id to other classification systems)
 ```bash
     conda activate <BIOBAKERY_ENV>
     PATH=<ENV_PATH>/lib/python3.10/site-packages/humann/data
