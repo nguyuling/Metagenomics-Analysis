@@ -8,9 +8,7 @@ set -e
 Scriptdir="$(cd "$(dirname "$0")" && pwd)"
 source "$Scriptdir/lib.sh"
 
-# global output directories and files
-Reads="$Outdir/0_reads"
-Cutadapt="$Outdir/3_cutadapt"
+# global output files
 cutadapt_txt="$Outdir/3_cutadapt/cutadapt.txt"
 Cross_Analysis="$Outdir/9_cross_analysis"
 
@@ -39,8 +37,7 @@ run_pair() {
     pathcoverage_unpacked="$Pathways_Analysis/${sample_name}_pathcoverage_unpacked.tsv"
 
     log "=== Sample $sample_name ==="
-    for stage in trim_adapters filter_rrna taxonomic_profiling \
-                 functional_profiling genes_mapping unpack_pathways; do
+    for stage in taxonomic_profiling functional_profiling genes_mapping unpack_pathways; do
         "$stage" || { log "Sample $sample_name stopped at $stage"; return 1; }
     done
 }
@@ -64,84 +61,6 @@ run_all_pairs() {                           # usage: run_all_pairs <force 0|1>
     else
         log "Step 8 skipped: no upstream changes"
     fi
-}
-
-trim_adapters() {
-    need "$cutadapt_txt" 1 || return 1
-
-    header=$(head -n 1 "$cutadapt_txt")
-    row=$(awk -F'\t' -v s="$sample_name" '$1 == s {print; exit}' "$cutadapt_txt")
-    if [ -z "$row" ]; then
-        log "ERROR: $sample_name not found in cutadapt.txt" && return 1
-    fi
-
-    IFS=$'\t' read -r -a cols <<< "$header"
-    IFS=$'\t' read -r -a vals <<< "$row"
-    r1_name=""
-    r2_name=""
-    cut_args=()
-    for i in "${!cols[@]}"; do
-        col="${cols[$i]}"
-        val="${vals[$i]:-}"
-        case "$col" in
-            ""|sample_name) continue ;;
-            r1)             r1_name="$val" ;;
-            r2)             r2_name="$val" ;;
-            -o|-p|-j)       log "WARN: column $col is set by the script, ignored" ;;
-            -*)             [ -n "$val" ] && cut_args+=("$col" "$val") ;;
-            *)              log "WARN: unknown column $col, ignored" ;;
-        esac
-    done
-
-    if [ -z "$r1_name" ] || [ -z "$r2_name" ]; then
-        log "ERROR: r1 and r2 columns must be set for $sample_name" && return 1
-    fi
-
-    r1="$Reads/$r1_name"
-    r2="$Reads/$r2_name"
-    need "$r1" 1 || return 1
-    need "$r2" 1 || return 1
-
-    skip_if_done "trim_adapters" "$trimmed_r1" "$trimmed_r2" && return 0
-    mkdir -p "$Cutadapt"
-
-    run cutadapt "${cut_args[@]}" \
-        -j "$threads" \
-        -o "$trimmed_r1" \
-        -p "$trimmed_r2" \
-        --report=full \
-        "$r1" "$r2"
-}
-
-filter_rrna() {
-    need "$trimmed_r1" 2 || return 1
-    need "$trimmed_r2" 2 || return 1
-    need "$Sortmerna_DB" || return 1
-    skip_if_done "filter_rrna" "$unaligned" && return 0
-    mkdir -p "$Sortmerna"
-    run sortmerna \
-        --ref "$Sortmerna_DB/silva-arc-16s-id95.fasta" \
-        --ref "$Sortmerna_DB/silva-arc-23s-id98.fasta" \
-        --ref "$Sortmerna_DB/silva-bac-16s-id90.fasta" \
-        --ref "$Sortmerna_DB/silva-bac-23s-id98.fasta" \
-        --ref "$Sortmerna_DB/silva-euk-18s-id95.fasta" \
-        --ref "$Sortmerna_DB/silva-euk-28s-id98.fasta" \
-        --ref "$Sortmerna_DB/rfam-5s-database-id98.fasta" \
-        --ref "$Sortmerna_DB/rfam-5.8s-database-id98.fasta" \
-        --workdir "$Sortmerna" \
-        --aligned "$Sortmerna/${sample_name}_aligned" \
-        --other "$Sortmerna/${sample_name}_unaligned" \
-        --fastx \
-        --out2 \
-        --paired_out \
-        --threads "$threads" \
-        --reads "$trimmed_r1" \
-        --reads "$trimmed_r2"  || return 1
-        # SET paired_in / paired_out (aligned if either read align / only if both reads align)
-    cat \
-        "$Sortmerna/${sample_name}_unaligned_fwd.fq" \
-        "$Sortmerna/${sample_name}_unaligned_rev.fq" \
-        > "$unaligned"
 }
 
 taxonomic_profiling() {
