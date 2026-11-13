@@ -1,0 +1,11 @@
+name: qc
+channels:
+  - biobakery
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - fastqc
+  - multiqc
+  - python=3.10
+prefix: /Volumes/T7/conda_envs/qc
