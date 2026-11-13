@@ -2,22 +2,12 @@
 
 ### Environments and packages
 (refer `qc.yml` and `biobakery.yml`)
-1. **qc**
-    - `fastqc`
-    - `multiqc`
-    - `cutadapt`
-    - `sortmerna`
-2. **biobakery**
-    - `python=3.10`
-    - `metaphlan`
-    - `krona`
-    - `humann=3.9=py_0`
-    - `pandas`
-    - `openpyxl`
+1. **qc** — fastqc, multiqc, cutadapt, sortmerna
+2. **biobakery** — metaphlan, krona, humann=3.9=py_0, pandas, openpyxl
 ```bash
     cd <ENV_PATH>
-        conda create -n <ENV_NAME> -c bioconda -c conda-forge fastqc multiqc cutadapt sortmerna
-        conda create -n <ENV_NAME> -c conda-forge -c bioconda -c biobakery -c defaults python=3.10 metaphlan krona humann=3.9 pandas openpyxl
+    conda create -n <QC_ENV_NAME> -c bioconda -c conda-forge fastqc multiqc cutadapt sortmerna
+    conda create -n <BIOBAKERY_ENV_NAME> -c conda-forge -c bioconda -c biobakery -c defaults python=3.10 metaphlan krona humann=3.9 pandas openpyxl
 ```
 
 ### Database
