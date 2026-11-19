@@ -103,7 +103,7 @@ functional_profiling() {
         --threads "$threads"
 }
 
-sort_table() {
+sort_table() {                              # usage: sort_table <table>
     file="$1"
     header=$(head -n 1 "$file")
     tail -n +2 "$file" | sort -t "$(printf '\t')" -k2,2gr > "$file.tmp"
@@ -195,7 +195,7 @@ cross_analysis() {
     skip_if_done "cross_analysis" "$Cross_Analysis/genefamilies_renormed.tsv" \
         "$Cross_Analysis/pathabundance.tsv" "$Cross_Analysis/pathcoverage.tsv" \
         "$Outdir/cross_analysis.xlsx" && return 0
-    mkdir -p "$Cross_Analysis"
+    mfkdir -p "$Cross_Analysis"
     samples=$(awk -F'\t' 'NR > 1 && $1 != "" {print $1}' "$cutadapt_txt")
     stage="$Cross_Analysis/.stage"
     rm -rf "$stage"
@@ -234,6 +234,5 @@ cross_analysis() {
 case "${1:-}" in
     all)        run_all_pairs 0 ;;
     allforce)   run_all_pairs 1 ;;
-    9)          force=1; generate_barplot "$2" "$3" || exit 1 ;;
     *)          echo "Usage: bash $0 [all   |   allforce    |   9 <table_path> <gene_id>]"; exit 1 ;;
 esac
