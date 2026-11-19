@@ -59,6 +59,7 @@
 
 
 ### Output Files Structure
+```bash
 metagenomics_biobakery
 ├── 0_reads
 │   └── (all raw paired-end reads)
@@ -144,3 +145,4 @@ metagenomics_biobakery
 ├── cross_analysis.xlsx
 └── logs
     └── pipeline_20261113_180933.log
+```
