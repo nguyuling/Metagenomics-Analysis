@@ -1,0 +1,16 @@
+name: biobakery
+channels:
+  - biobakery
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - metaphlan
+  - sortmerna
+  - humann=3.9=py_0
+  - krona 
+  - pandas
+  - openpyxl
+  - cutadapt
+prefix: /Volumes/T7/conda_envs/biobakery
