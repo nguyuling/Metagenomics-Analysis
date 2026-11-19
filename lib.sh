@@ -2,7 +2,7 @@
 set -e
 
 # SET output and database directories
-Outdir=/Volumes/T7/metagenomics_project             # output directory
+Outdir=/Volumes/T7/metagenomics_biobakery            # output directory
 Sortmerna_DB=/Volumes/T7/databases/sortmerna        # rrna sequences database
 Metaphlan_DB=/Volumes/T7/conda_envs/biobakery/lib/python3.10/site-packages/metaphlan/metaphlan_databases # metaphlan database
 Humann_DB=/Volumes/T7/conda_envs/biobakery/lib/python3.10/site-packages/humann/data
