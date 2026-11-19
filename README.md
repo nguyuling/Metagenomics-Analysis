@@ -1,6 +1,9 @@
 ## Metagenomics Analysis Pipeline
+<p align="center">
+    <img src="img/metagenomics-analysis.drawio.svg" width="800">
+</p>
 
-### Environments and packages
+### Environments and Packages
 (refer `qc.yml` and `biobakery.yml`)
 1. **qc** — fastqc, multiqc, cutadapt, sortmerna
 2. **biobakery** — metaphlan, krona, humann, pandas, openpyxl
@@ -54,4 +57,90 @@
     bash biobakery.sh allforce     # run all steps regardlessly
 ```
 
+
 ### Output Files Structure
+metagenomics_biobakery
+├── 0_reads
+│   └── (all raw paired-end reads)
+├── 1_fastqc
+│   ├── <sample_1>_R1_fastqc.html
+│   ├── <sample_1>_R1_fastqc.zip
+│   ├── <sample_1>_R2_fastqc.html
+│   ├── <sample_1>_R2_fastqc.zip
+│   ├──            ⋮
+│   ├── <sample_n>_R1_fastqc.html
+│   ├── <sample_n>_R1_fastqc.zip
+│   ├── <sample_n>_R2_fastqc.html
+│   └── <sample_n>_R2_fastqc.zip       
+├── 2_multiqc
+│   ├── multiqc_report.pdf
+│   └── multiqc_report_data
+├── 3_cutadapt
+│   ├── <sample_1>
+│   │   ├── <sample_1>_trimmed_R1.fastq
+│   │   └── <sample_1>_trimmed_R2.fastq
+│   ├──     ⋮
+│   ├── <sample_n>
+│   └── cutadapt.txt
+├── 4_sortmerna
+│   ├── <sample_1>
+│   │   ├── <sample_1>.fq
+│   │   ├── <sample_1>_aligned.log
+│   │   ├── <sample_1>_aligned_fwd.fq
+│   │   ├── <sample_1>_aligned_rev.fq
+│   │   ├── <sample_1>_unaligned_fwd.fq
+│   │   ├── <sample_1>_unaligned_rev.fq
+│   │   ├── idx
+│   │   └── kvdb
+│   ├──     ⋮
+│   └── <sample_n>
+├── 5_metaphlan
+│   ├── <sample_1>
+│   │   ├── <sample_1>.krona.html
+│   │   ├── <sample_1>_krona.txt
+│   │   ├── <sample_1>_metagenome_vJun23.bowtie2.bz2
+│   │   └── <sample_1>_taxonomic_profile.tsv
+│   ├──     ⋮
+│   └── <sample_n>
+├── 6_humann
+│   ├── <sample_1>
+│   │   ├── <sample_1>_genefamilies.tsv
+│   │   ├── <sample_1>_pathabundance.tsv
+│   │   └── <sample_1>_pathcoverage.tsv
+│   ├──     ⋮
+│   └── <sample_n>
+├── 7_genes_mapping
+│   ├── <sample_1>
+│   │   ├── <sample_1>_eggnog.tsv
+│   │   ├── <sample_1>_go.tsv
+│   │   ├── <sample_1>_ko.tsv
+│   │   ├── <sample_1>_level4ec.tsv
+│   │   ├── <sample_1>_pfam.tsv
+│   │   ├── <sample_1>_uniref50.tsv
+│   │   ├── <sample_1>_uniref90.tsv
+│   │   ├── regrouped
+│   │   │   └── ⋮
+│   │   ├── renamed
+│   │   │   └── ⋮
+│   │   └── renormed
+│   │       └── ⋮
+│   ├──     ⋮
+│   └── <sample_n>
+├── 8_pathways_analysis
+│   ├── <sample_1>
+│   │   ├── <sample_1>_pathabundance_unpacked.tsv
+│   │   └── <sample_1>_pathcoverage_unpacked.tsv
+│   ├──     ⋮
+│   └── <sample_n>
+├── 9_cross_analysis
+│   ├── genefamilies.tsv
+│   ├── genefamilies_renormed.tsv
+│   ├── pathabundance.tsv
+│   ├── pathabundance_renormed.tsv
+│   └── pathcoverage.tsv
+├── <sample_1>.xlsx
+│       ⋮
+├── <sample_n>.xlsx
+├── cross_analysis.xlsx
+└── logs
+    └── pipeline_20261113_180933.log
