@@ -1,6 +1,6 @@
 ## Metagenomics Analysis Pipeline
 <p align="center">
-    <img src="img/metagenomics-biobakery.drawio.svg" width="800">
+    <img src="img/biobakery_pipeline.drawio.svg" width="800">
 </p>
 
 ### Environments and Packages
