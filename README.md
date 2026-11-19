@@ -97,7 +97,7 @@ metagenomics_biobakery
 │   └── <sample_n>
 ├── 5_metaphlan
 │   ├── <sample_1>
-│   │   ├── <sample_1>.krona.html
+│   │   ├── <sample_1>.krona.html   # visualization of taxonomic composition
 │   │   ├── <sample_1>_krona.txt
 │   │   ├── <sample_1>_metagenome_vJun23.bowtie2.bz2
 │   │   └── <sample_1>_taxonomic_profile.tsv
@@ -111,7 +111,7 @@ metagenomics_biobakery
 │   ├──     ⋮
 │   └── <sample_n>
 ├── 7_genes_mapping
-│   ├── <sample_1>
+│   ├── <sample_1>                  # regrouped, renamed, renormed gene families abundance
 │   │   ├── <sample_1>_eggnog.tsv
 │   │   ├── <sample_1>_go.tsv
 │   │   ├── <sample_1>_ko.tsv
@@ -128,21 +128,21 @@ metagenomics_biobakery
 │   ├──     ⋮
 │   └── <sample_n>
 ├── 8_pathways_analysis
-│   ├── <sample_1>
+│   ├── <sample_1>                  # renamed, renormed, unpacked pathways
 │   │   ├── <sample_1>_pathabundance_unpacked.tsv
 │   │   └── <sample_1>_pathcoverage_unpacked.tsv
 │   ├──     ⋮
 │   └── <sample_n>
-├── 9_cross_analysis
+├── 9_cross_analysis                # joined table of all samples
 │   ├── genefamilies.tsv
 │   ├── genefamilies_renormed.tsv
 │   ├── pathabundance.tsv
 │   ├── pathabundance_renormed.tsv
 │   └── pathcoverage.tsv
-├── <sample_1>.xlsx
+├── <sample_1>.xlsx                 # excel: per-sample gene families & pathways
 │       ⋮
 ├── <sample_n>.xlsx
-├── cross_analysis.xlsx
-└── logs
+├── cross_analysis.xlsx             # excel: cross-sample gene families & pathways
+└── logs                            # log files
     └── pipeline_20261113_180933.log
 ```
