@@ -8,11 +8,11 @@ set -e
 Scriptdir="$(cd "$(dirname "$0")" && pwd)"
 source "$Scriptdir/lib.sh"
 
-# global output files
+# global output directory / file
 cutadapt_txt="$Outdir/3_cutadapt/cutadapt.txt"
 Cross_Analysis="$Outdir/9_cross_analysis"
 
-run_pair() {
+run_pair() {                                # to run metaphlan & humann on a read pair
     sample_name="$1"
 
     # per-sample output directories
@@ -32,7 +32,7 @@ run_pair() {
     genefamilies_renormed_uniref90="$Genes_Mapping/renormed/${sample_name}_renormed_uniref90.tsv"
     pathabundance="$Humann/${sample_name}_pathabundance.tsv"
     pathcoverage="$Humann/${sample_name}_pathcoverage.tsv"
-    pathabundance_renormed="$Outdir/tmp/${sample_name}_pathabundance_renormed.tsv"
+    pathabundance_renormed="$Pathways_Analysis/${sample_name}_pathabundance_renormed.tsv.tmp"
     pathabundance_unpacked="$Pathways_Analysis/${sample_name}_pathabundance_unpacked.tsv"
     pathcoverage_unpacked="$Pathways_Analysis/${sample_name}_pathcoverage_unpacked.tsv"
 
@@ -42,7 +42,7 @@ run_pair() {
     done
 }
 
-run_all_pairs() {                           # usage: run_all_pairs <force 0|1>
+run_all_pairs() {                           # to loop run_pair() on all samples
     force=$1
     before=${ran_count:-0}
     failed=""
@@ -52,8 +52,7 @@ run_all_pairs() {                           # usage: run_all_pairs <force 0|1>
     done
 
     if [ -n "$failed" ]; then
-        log "Step 8 skipped: failed samples:$failed"
-        return 1
+        log "Step 8 skipped: failed samples:$failed" && return 1
     fi
 
     if [ "${ran_count:-0}" -gt "$before" ] || [ "$force" = 1 ] || [ ! -e "$Cross_Analysis/genefamilies_renormed.tsv" ]; then
@@ -63,7 +62,7 @@ run_all_pairs() {                           # usage: run_all_pairs <force 0|1>
     fi
 }
 
-taxonomic_profiling() {
+taxonomic_profiling() {                     # to run metaphlan and generate krona pie chart 
     need "$unaligned" 3 || return 1
     need "$Metaphlan_DB" || return 1
     skip_if_done "taxonomic_profiling" "$taxonomic_profile" "$Metaphlan/$sample_name.krona.html" && return 0
@@ -84,10 +83,9 @@ taxonomic_profiling() {
         -o "$Metaphlan/$sample_name.krona.html" \
         -n 'all' \
         "$Metaphlan/${sample_name}_krona.txt"
-        # SET n (highest taxa level name)
 }
 
-functional_profiling() {
+functional_profiling() {                    # to run humann 
     need "$unaligned" 3 || return 1
     need "$taxonomic_profile" 4 || return 1
     need "$Humann_DB/chocophlan" || return 1
@@ -103,7 +101,7 @@ functional_profiling() {
         --threads "$threads"
 }
 
-sort_table() {                              # usage: sort_table <table>
+sort_table() {                              # to sort abundance/coverage values in descending order
     file="$1"
     header=$(head -n 1 "$file")
     tail -n +2 "$file" | sort -t "$(printf '\t')" -k2,2gr > "$file.tmp"
@@ -111,7 +109,7 @@ sort_table() {                              # usage: sort_table <table>
     rm -f "$file.tmp"
 }
 
-genes_mapping() {
+genes_mapping() {                           # to regroup, sort, rename and renorm gene families abundance
     need "$genefamilies" 5 || return 1
     need "$Humann_DB/utility_mapping" || return 1
     path="$Genes_Mapping/${sample_name}"
@@ -155,18 +153,17 @@ level4ec    map_level4ec_uniref90.txt.gz    map_ec_name.txt.gz
 pfam        map_pfam_uniref90.txt.gz        map_pfam_name.txt.gz
 EOF
 
-    rm -f "$Outdir/$sample_name.xlsx"          # start a fresh workbook for this sample
+    rm -f "$Outdir/$sample_name.xlsx"
     run python "$Scriptdir/make_excel.py" "$sample_name" "$Outdir" "$Genes_Mapping" || return 1
 }
 
-unpack_pathways() {
+unpack_pathways() {                         # to assign gene families to pathways
     need "$genefamilies_renormed_uniref90" 6 || return 1
     need "$pathabundance" 5 || return 1
     need "$pathcoverage" 5 || return 1
     need "$Humann_DB/pathways" || return 1
     skip_if_done "unpack_pathways" "$pathabundance_unpacked" "$pathcoverage_unpacked" && return 0
-    mkdir -p "$Pathways_Analysis" "$Outdir/tmp"
-    rm -f "$pathabundance_renormed"                 # clear any leftover from an interrupted run
+    rm -f "$pathabundance_renormed"
 
     run sort_table "$pathabundance" || return 1
     run humann_renorm_table \
@@ -179,7 +176,7 @@ unpack_pathways() {
         --gene-mapping "$Humann_DB/pathways/metacyc_reactions_level4ec_only.uniref.bz2" \
         --pathway-mapping "$Humann_DB/pathways/metacyc_pathways_structured_filtered_v24" \
         --output "$pathabundance_unpacked" || return 1
-    rm -f "$pathabundance_renormed"                 # temporary file, no longer needed
+    rm -f "$pathabundance_renormed"         # rm temp renormed pathways abundance after unpacking
 
     run sort_table "$pathcoverage" || return 1
     run humann_unpack_pathways \
@@ -191,7 +188,7 @@ unpack_pathways() {
     run python "$Scriptdir/make_excel.py" "$sample_name" "$Outdir" "$Pathways_Analysis" || return 1
 }
 
-cross_analysis() {
+cross_analysis() {                          # to join gene families & pathways tables of all samples
     skip_if_done "cross_analysis" "$Cross_Analysis/genefamilies_renormed.tsv" \
         "$Cross_Analysis/pathabundance.tsv" "$Cross_Analysis/pathcoverage.tsv" \
         "$Outdir/cross_analysis.xlsx" && return 0
@@ -215,7 +212,7 @@ cross_analysis() {
         -c "$Humann_DB/utility_mapping/map_uniref90_name.txt.bz2" \
         -o "$Cross_Analysis/genefamilies.tmp" \
     && mv "$Cross_Analysis/genefamilies.tmp" "$Cross_Analysis/genefamilies.tsv" \
-    || { rm -rf "$stage"; return 1; }
+    || { rm -rf "$stgae"; return 1; }
     run humann_renorm_table \
         -i "$Cross_Analysis/genefamilies.tsv" -u relab \
         -o "$Cross_Analysis/genefamilies_renormed.tsv" || { rm -rf "$stage"; return 1; }
@@ -234,5 +231,5 @@ cross_analysis() {
 case "${1:-}" in
     all)        run_all_pairs 0 ;;
     allforce)   run_all_pairs 1 ;;
-    *)          echo "Usage: bash $0 [all   |   allforce    |   9 <table_path> <gene_id>]"; exit 1 ;;
+    *)          echo "Usage: bash $0 [ all  |  allforce ]"; exit 1 ;;
 esac
