@@ -57,6 +57,9 @@
     bash biobakery.sh allforce     # run all steps regardlessly
 ```
 
+### Sample Data
+DNA Sequence from Monoculture Carrot Rhizosphere (SRR31030799)
+DNA-Sequence from Soybean-precedent Carrot Rhizosphere (SRR30910742)
 
 ### Output Files Structure
 ```bash
