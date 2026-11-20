@@ -16,30 +16,30 @@ Cutadapt="$Outdir/3_cutadapt"
 Sortmerna_Root="$Outdir/4_sortmerna"
 cutadapt_txt="$Cutadapt/cutadapt.txt"
 
-move_reads() {
+move_reads() {                                      # to move all raw reads from outdir to subdir
     mkdir -p "$Reads"
     if ls "$Outdir"/*.fastq* >/dev/null 2>&1; then  # if read files exist in outdir
         mv "$Outdir"/*.fastq* "$Reads" || return 1  # move them to reads folder
         log "Moved reads to $Reads"
     else
-        log "No .fastq* files in $Outdir, skipping move."   # handle subsequent runs
+        log "No .fastq* files in $Outdir, skipping move."   # to handle subsequent runs
     fi
 }
 
-run_fastqc() {
+run_fastqc() {                          # to run fastq on all read pairs
     need "$Reads" 1 || return 1
     run mkdir -p "$Fastqc" || return 1
-    for f in "$Reads"/*.fastq*; do
-        [ -f "$f" ] || continue
-        base=$(basename "$f")
-        name=${base%.fastq.gz}          # strip .fastq.gz first
-        name=${name%.fastq}             # then plain .fastq
+    for f in "$Reads"/*.fastq*; do      # for each read file                  
+        [ -f "$f" ] || continue         # if it's a file
+        base=$(basename "$f")           # extract filename from full path
+        name=${base%.fastq.gz}          # strip .fastq.gz extension
+        name=${name%.fastq}             # strip .fastq extension
         skip_if_done "fastqc $base" "$Fastqc/${name}_fastqc.html" && continue
         run fastqc -o "$Fastqc" -t "$threads" "$f" || return 1
     done
 }
 
-run_multiqc() {
+run_multiqc() {                         # to run multiqc on the fastqc folder 
     need "$Fastqc" 1 || return 1
     skip_if_done "multiqc" "$Multiqc/multiqc_report.pdf" && return 0
     mkdir -p "$Multiqc"
@@ -49,7 +49,7 @@ run_multiqc() {
         --pdf "$Fastqc" || return 1
 }
 
-make_cutadapt_txt() {
+make_cutadapt_txt() {                   # to make default cutadapt specification txt allowing custom flag/value
     need "$Reads" 1 || return 1
     skip_if_done "make_cutadapt_txt" "$cutadapt_txt" && return 0
     mkdir -p "$(dirname "$cutadapt_txt")"
@@ -65,34 +65,34 @@ make_cutadapt_txt() {
     -m    20'
 
     header=$(printf '%s\n' "$mapping" | while read -r header value; do  # read header and value columns from mapping
-        printf '%s\t' "$header"                         # append headers separated by tab
+        printf '%s\t' "$header"         # append headers separated by tab
     done)
-    printf '%s\n' "${header%\t}" > "$cutadapt_txt"      # write header to cutadapt.txt
+    printf '%s\n' "${header%\t}" > "$cutadapt_txt"  # write header to cutadapt.txt
 
-    paired=0                                            # init counters
+    paired=0                            # init counters
     unpaired=0
 
-    for f in "$Reads"/*_R1*; do                         # for each read file containing _R1
-        [ -f "$f" ] || continue                         # check if it is file
-        r1=$(basename "$f")                             # store r1 file name
-        sample_name="${r1%%_R1*}"                       # sample name = text before _R1
-        r2=$(echo "$r1" | sed 's/_R1/_R2/')             # generate expected r2 filename
-        if [ ! -f "$Reads/$r2" ]; then                  # if expected r2 not found
-            unpaired=$((unpaired + 1))                  # increase unpaired counter
-            continue                                    # continue to find pair reads
+    for f in "$Reads"/*_R1*; do         # for each read file containing _R1
+        [ -f "$f" ] || continue         # check if it is file
+        r1=$(basename "$f")             # store r1 file name
+        sample_name="${r1%%_R1*}"       # sample name = text before _R1
+        r2=$(echo "$r1" | sed 's/_R1/_R2/') # generate expected r2 filename
+        if [ ! -f "$Reads/$r2" ]; then  # if expected r2 not found
+            unpaired=$((unpaired + 1))  # increase unpaired counter
+            continue                    # continue to find pair reads
         fi
         row=$(printf '%s\n' "$mapping" | while read -r header value; do # read header and value column from mapping
-            eval "v=$value"                             # expand value (to handle reference variables)
-            printf '%s\t' "$v"                          # append values separated by tab
+            eval "v=$value"             # expand value (to handle reference variables)
+            printf '%s\t' "$v"          # append values separated by tab
         done)
         printf '%s\n' "${row%$\t}" >> "$cutadapt_txt"   # write values to cutadapt.txt
-        paired=$((paired + 1))                          # increase paired counter
+        paired=$((paired + 1))          # increase paired counter
     done
 
-    for f in "$Reads"/*_R2*; do                         # for each read file containing _R2
-        [ -f "$f" ] || continue                         # check if it is file
-        r2=$(basename "$f")                             # store r2 file name
-        r1=$(echo "$r2" | sed 's/_R2/_R1/')             # generate expected r1 filename
+    for f in "$Reads"/*_R2*; do         # for each read file containing _R2
+        [ -f "$f" ] || continue         # check if it is file
+        r2=$(basename "$f")             # store r2 file name
+        r1=$(echo "$r2" | sed 's/_R2/_R1/')     # generate expected r1 filename
         [ -f "$Reads/$r1" ] || unpaired=$((unpaired + 1))   # if expected r1 not found then increase unpaired counter
     done
 
@@ -103,7 +103,7 @@ make_cutadapt_txt() {
     fi
 }
 
-trim_adapters() {
+trim_adapters() {                       # to trim adapters of each read pair
     need "$cutadapt_txt" 1 || return 1
 
     header=$(head -n 1 "$cutadapt_txt")
@@ -150,7 +150,7 @@ trim_adapters() {
         "$r1" "$r2"
 }
 
-filter_rrna() {
+filter_rrna() {                         # to separate rRNA and non-rRNA reads
     need "$trimmed_r1" 2 || return 1
     need "$trimmed_r2" 2 || return 1
     need "$Sortmerna_DB" || return 1
@@ -180,18 +180,20 @@ filter_rrna() {
         > "$unaligned"
 }
 
-sample_done() {                             # usage: sample_done <sample_name>
+sample_done() {                         # usage: sample_done <sample_name>
     [ -e "$Cutadapt/$1/${1}_trimmed_R1.fastq" ] &&
     [ -e "$Cutadapt/$1/${1}_trimmed_R2.fastq" ] &&
     [ -e "$Sortmerna_Root/$1/${1}.fq" ]
 }
 
-trim_filter() {                                # asks before trimming, then loops over samples
+trim_filter() {                         # to ask user before looping over pairs to trim and filter
     samples=$(awk -F'\t' 'NR > 1 && $1 != "" {print $1}' "$cutadapt_txt")
 
     pending=0
     for s in $samples; do
-        sample_done "$s" || pending=1
+        [ -e "$Cutadapt/$s/${s}_trimmed_R1.fastq" ] &&
+        [ -e "$Cutadapt/$s/${s}_trimmed_R2.fastq" ] &&
+        [ -e "$Sortmerna_Root/$s/${s}.fq" ] || pending=1
     done
     if [ "$pending" = 0 ] && [ "$force" != 1 ]; then
         log "Trimming and rRNA filtering already done for all samples"
@@ -199,9 +201,9 @@ trim_filter() {                                # asks before trimming, then loop
     fi
 
     printf 'Continue with trim_adapters and filter_rrna using the current cutadapt.txt? [y/n] '
-    read -r answer || answer=n              # no input (non-interactive) counts as no
+    read -r answer || answer=n              # no input counts as no
     case "$answer" in
-        y|Y) ;;
+        y|Y) ;;                             # y input runs trim & filter
         *)   log "Stopped before trimming. Edit cutadapt.txt, then run again."; return 0 ;;
     esac
 
